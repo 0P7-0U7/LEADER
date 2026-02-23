@@ -1,0 +1,13 @@
+# Classes (Usually color coded Orange)
+OSCLeader	KEYWORD1
+OSCFollower	KEYWORD1
+OSCBuffer	KEYWORD1
+
+# Methods and Functions (Usually color coded Brown)
+begin	KEYWORD2
+update	KEYWORD2
+setIndicator	KEYWORD2
+send	KEYWORD2
+onReceive	KEYWORD2
+enableHeartbeat	KEYWORD2
+triggerHop	KEYWORD2

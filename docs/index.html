@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEADER | OPT-OUT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700&display=swap');
+        
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --code-bg: #f4f4f4;
+            --border-color: #000000;
+        }
+
+        body.dark-mode {
+            --bg: #000000;
+            --fg: #ffffff;
+            --code-bg: #1a1a1a;
+            --border-color: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        pre, code {
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 0 !important;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--fg);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .border-sharp {
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s;
+        }
+
+        /* Sidebar Links */
+        .sidebar-link {
+            display: block;
+            padding: 0.5rem 0;
+            text-decoration: none;
+            color: var(--fg);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .sidebar-link:hover {
+            border-bottom: 1px solid var(--fg);
+        }
+
+        /* Tables */
+        table { border-collapse: collapse; width: 100%; }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+            transition: border-color 0.3s;
+        }
+        th { background-color: var(--fg); color: var(--bg); transition: background-color 0.3s, color 0.3s; }
+
+        /* Headers & Footer Border */
+        h1, h2, h3, h4, footer {
+            border-color: var(--border-color);
+            transition: border-color 0.3s;
+        }
+        h1, h2, h3, h4 { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Theme Toggling Logic */
+        #logo-dark, #sun-icon { display: none; }
+        #logo-light, #moon-icon { display: block; }
+
+        body.dark-mode #logo-dark { display: block; }
+        body.dark-mode #logo-light { display: none; }
+        body.dark-mode #sun-icon { display: block; }
+        body.dark-mode #moon-icon { display: none; }
+
+        /* Invert the black tag in dark mode */
+        body.dark-mode .bg-black { background-color: #ffffff; color: #000000; }
+
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <header class="mb-16 border-b-4 pb-8 border-[var(--border-color)]">
+        <div class="flex justify-between items-center mb-8 flex-wrap gap-8">
+            
+            <div class="flex items-center gap-8">
+                <div class="w-24 h-24 relative flex-shrink-0">
+                    <img src="LOGO_LIGHT.png" id="logo-light" class="absolute inset-0 w-full h-full object-contain" alt="Light Logo">
+                    <img src="LOGO_DARK.png" id="logo-dark" class="absolute inset-0 w-full h-full object-contain" alt="Dark Logo">
+                </div>
+                <h1 class="text-6xl md:text-8xl leading-none">LEADER</h1>
+            </div>
+
+            <div class="text-right flex flex-col items-end gap-6">
+                 <button id="theme-toggle" class="focus:outline-none p-2 border-sharp hover:bg-[var(--fg)] hover:text-[var(--bg)] transition-colors cursor-pointer">
+                    <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                    </svg>
+                    <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+                <div>
+                    <p class="font-bold text-xl uppercase tracking-tighter">OPT-OUT</p>
+                    <p class="text-xs uppercase tracking-widest opacity-60">Brussels 2026</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-xl uppercase tracking-widest">High-Performance OSC over ESP-NOW System</p>
+        <div class="mt-8 flex flex-wrap gap-4 text-sm font-bold uppercase">
+            <span class="border-sharp px-4 py-1">Build v1.2.0</span>
+            <span class="border-sharp px-4 py-1">Native USB Enabled</span>
+            <span class="border-sharp px-4 py-1 bg-black text-white transition-colors">CNMAT Compatible</span>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+        
+        <aside class="md:col-span-1">
+            <nav class="sticky top-12 space-y-4 uppercase text-xs font-bold tracking-tighter">
+                <a href="#logic" class="sidebar-link">01. Architecture</a>
+                <a href="#leader" class="sidebar-link">02. OSCLeader Class</a>
+                <a href="#follower" class="sidebar-link">03. OSCFollower Class</a>
+                <a href="#miniosc" class="sidebar-link">04. MiniOSC Engine</a>
+                <a href="#cnmat" class="sidebar-link">05. CNMAT Integration</a>
+                <a href="#system" class="sidebar-link">06. System Commands</a>
+                <a href="#quickstart" class="sidebar-link">07. Implementation</a>
+            </nav>
+        </aside>
+
+        <main class="md:col-span-3 space-y-24">
+
+            <section id="logic">
+                <h2 class="text-3xl mb-6">01. Architecture</h2>
+                <p class="mb-6 max-w-2xl">
+                    LEADER is a specialized networking library for ESP32. It facilitates a zero-config bridge between <strong>Serial SLIP OSC</strong> (Pure Data/MaxMSP) and <strong>Wireless ESP-NOW</strong>. Developed by OPT-OUT for ultra-low-latency artistic environments.
+                </p>
+                
+                <div class="mb-12 p-8 border-sharp bg-[var(--code-bg)] overflow-x-auto">
+                    <div class="min-w-[600px] flex items-center justify-between gap-4 font-mono text-sm font-bold uppercase text-center">
+                        
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="border-sharp p-4 bg-[var(--bg)]">Computer A<br><span class="text-xs opacity-60">Pure Data</span></div>
+                            <div class="text-xs opacity-60">USB SLIP</div>
+                            <div class="border-sharp p-4 bg-[var(--fg)] text-[var(--bg)] shadow-[4px_4px_0_var(--fg)] transition-colors">LEADER</div>
+                        </div>
+
+                        <div class="flex-grow flex flex-col items-center justify-center opacity-70">
+                            <span>ESP-NOW</span>
+                            <span class="tracking-[0.5em] font-bold">≈≈≈≈≈≈≈></span>
+                        </div>
+
+                        <div class="flex flex-col gap-6 w-64 pr-16">
+                            <div class="border-sharp p-3 bg-[var(--bg)] flex justify-between items-center relative transition-colors">
+                                <span>Follower</span>
+                                <span class="text-xs border-sharp px-2 py-1 bg-[var(--code-bg)] transition-colors">BATTERY</span>
+                                <div class="absolute -right-24 top-1/2 -translate-y-1/2 text-xs opacity-60 text-left leading-tight font-normal">
+                                    -> Sensors<br>-> LEDs
+                                </div>
+                            </div>
+
+                            <div class="border-sharp p-3 bg-[var(--bg)] flex justify-between items-center relative transition-colors">
+                                <span>Follower</span>
+                                <span class="text-xs border-sharp px-2 py-1 bg-[var(--code-bg)] transition-colors">USB</span>
+                                <div class="absolute -right-24 top-1/2 -translate-y-1/2 text-xs opacity-60 text-left leading-tight font-normal">
+                                    -> Computer B<br>(Resolume)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 border-sharp">
+                    <div class="p-8 border-b sm:border-b-0 sm:border-r border-[var(--border-color)]">
+                        <h3 class="text-lg mb-2">The Leader</h3>
+                        <p class="text-sm">Stationary master node. Plugged into the main PC via USB. Translates SLIP OSC into high-speed radio broadcasts. Dictates channel hopping and telemetry.</p>
+                    </div>
+                    <div class="p-8 border-b sm:border-b-0 sm:border-r border-[var(--border-color)]">
+                        <h3 class="text-lg mb-2">Follower (Sensor)</h3>
+                        <p class="text-sm">Standalone, battery-powered node. Reads physical sensors/pins and beams data directly to the Leader. Uses zero USB CPU overhead.</p>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-lg mb-2">Follower (Tethered)</h3>
+                        <p class="text-sm">Plugged into a secondary PC via USB. Acts as a flawless two-way bridge between computers with zero Wi-Fi router latency.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="leader">
+                <h2 class="text-3xl mb-6">02. OSCLeader Class</h2>
+                <div class="space-y-6">
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void begin(Stream& port, long baud, uint8_t channel, bool autoHop)</code>
+                        <p class="text-sm mt-2 opacity-70">Initializes ESP-NOW and starts the Serial-to-Radio bridge. Usually attached to <code>Serial</code> at <code>1000000</code> baud.</p>
+                    </div>
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">bool update()</code>
+                        <p class="text-sm mt-2 opacity-70">Processes the Serial SLIP buffer and handles wireless synchronization. Must be called in every loop.</p>
+                    </div>
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void setIndicator(int pin)</code>
+                        <p class="text-sm mt-2 opacity-70">Assigns a hardware LED pin to flash dynamically on successful packet transmission/reception.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="follower">
+                <h2 class="text-3xl mb-6">03. OSCFollower Class</h2>
+                <div class="space-y-6">
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void begin(uint8_t channel, bool enableUSB, long baudRate)</code>
+                        <p class="text-sm mt-2 opacity-70">Starts as a wireless client. Set <code>enableUSB</code> to true to activate Tethered Bridge mode and set your desired <code>baudRate</code>.</p>
+                    </div>
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void send(const uint8_t *data, int len)</code>
+                        <p class="text-sm mt-2 opacity-70">Broadcasts raw formatted OSC byte arrays out to the wireless network.</p>
+                    </div>
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void enableHeartbeat(uint32_t ms, uint32_t id)</code>
+                        <p class="text-sm mt-2 opacity-70">Starts an automated <code>/sys/pong</code> service. The <code>id</code> is sent as a lightweight integer to keep network traffic minimal.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="miniosc">
+                <h2 class="text-3xl mb-6">04. MiniOSC Engine</h2>
+                <p class="mb-6 max-w-2xl">
+                    While user data relies on standard OSC libraries, the LEADER system's internal telemetry is powered by <strong>MiniOSC</strong>. It is a ruthlessly efficient, zero-dynamic-memory parser running entirely in the background. 
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-sm font-bold mb-2">Background Telemetry</h4>
+                        <p class="text-sm opacity-80">It handles core network commands like <code>/sys/ping</code>, <code>/leader/hop</code>, and heartbeats. By strictly restricting its payloads to 32-bit integers, it keeps network administrative traffic microscopic (often just 4 to 8 bytes per packet) to prevent airwave congestion.</p>
+                    </div>
+                    <div class="border-l-4 border-[var(--border-color)] pl-4">
+                        <pre class="bg-transparent border-0 p-0 text-sm"><code>// Internal Pack Function
+MiniOSC::pack(buffer, address, inArray, argCount);
+
+// Internal Extract Function
+MiniOSC::extract(data, len, address, outArray, maxArgs);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cnmat">
+                <h2 class="text-3xl mb-6">05. CNMAT Integration</h2>
+                <p class="mb-6 max-w-2xl">
+                    Standard CNMAT OSC libraries cannot natively transmit over ESP-NOW. CNMAT is designed to stream data byte-by-byte (via the Arduino <code>Print</code> class), whereas ESP-NOW demands strictly formatted, pre-assembled memory arrays. 
+                </p>
+                <div class="space-y-8">
+                    <div>
+                        <h4 class="text-sm font-bold mb-2">The OSCBuffer Adaptor</h4>
+                        <p class="text-sm mb-4 opacity-80">We built the <strong><code>OSCBuffer</code></strong> class to act as the universal adaptor. It safely catches the streaming bytes from CNMAT, compiles them into a contiguous radio-ready array, and explicitly pads the tail to mathematically perfect 4-byte multiples (a strict requirement for Pure Data's SLIP decoder).</p>
+                        <pre><code>// 1. Create your standard CNMAT message
+OSCMessage msg("/sensor/dial");
+msg.add(3.14);
+
+// 2. Pour the stream into the OPT-OUT Buffer
+OSCBuffer myBuffer;
+msg.send(myBuffer);
+
+// 3. SECURE THE PADDING (Crucial for Pure Data)
+myBuffer.end(); 
+
+// 4. Beam the compiled array to the Leader
+follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="system">
+                <h2 class="text-3xl mb-6">06. System Commands</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Address</th>
+                            <th>Args</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-mono">/leader/ping</td>
+                            <td>-</td>
+                            <td>Returns telemetry: Channel, Uptime, Heap, Sent, Dropped.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono">/leader/hop</td>
+                            <td>-</td>
+                            <td>Leader forces network to find cleanest channel and migrate.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono">/sys/ping</td>
+                            <td>int</td>
+                            <td>Sent from Leader. Sets heartbeat MS for all Followers (0 = OFF).</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono">/sys/pong</td>
+                            <td>int</td>
+                            <td>Automatic Follower reply containing its unique node ID.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="quickstart">
+                <h2 class="text-3xl mb-6">07. Implementation</h2>
+                
+                <div class="grid grid-cols-1 gap-12">
+                    <div>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The Leader Bridge</h3>
+                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer handling Pure Data.</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
+
+OSCLeader bridge;
+
+void setup() {
+  Serial.begin(1000000); 
+  bridge.begin(Serial, 1000000, 1, false);
+  bridge.setIndicator(2); // LED on pin 2 flashes on traffic
+}
+
+void loop() {
+  bridge.update();
+}</code></pre>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Tethered Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way SLIP-to-Radio bridge.</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
+
+OSCFollower bridge2;
+
+void setup() {
+  // Channel 1, USB SLIP = true, Baud = 1000000
+  bridge2.begin(1, true, 1000000); 
+}
+
+void loop() {
+  // Silently routes USB to Radio and Radio to USB
+  bridge2.update();
+}</code></pre>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Sensor Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Running on a battery, reading a sensor, and correctly assembling the array for ESP-NOW.</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
+#include &lt;OSCMessage.h&gt;
+
+OSCFollower node;
+
+void setup() {
+  // Channel 1, USB SLIP = false (Battery Mode)
+  node.begin(1, false); 
+  node.enableHeartbeat(1000, 42); // Send ID 42 every 1 sec
+}
+
+void loop() {
+  node.update();
+
+  // Send a sensor reading every 50ms
+  static unsigned long lastSend = 0;
+  if (millis() - lastSend > 50) {
+    lastSend = millis();
+    
+    OSCMessage msg("/sensor/pot");
+    msg.add(analogRead(34));
+
+    OSCBuffer buf;
+    msg.send(buf);
+    buf.end(); // Assemble and pad the array!
+    
+    node.send(buf.buffer, buf.length);
+  }
+}</code></pre>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <footer class="mt-32 pt-12 border-t border-[var(--border-color)] text-xs uppercase font-bold tracking-widest flex justify-between">
+        <span>LEADER OSC TOOLKIT</span>
+        <span>OPT-OUT / BRUSSELS 2026</span>
+    </footer>
+
+    <script>
+        // Theme Toggling Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const bodyElement = document.body;
+
+        // Check local storage for saved theme preference on load
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            bodyElement.classList.add('dark-mode');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            bodyElement.classList.toggle('dark-mode');
+            
+            // Save preference
+            if (bodyElement.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
+
+</body>
+</html>
