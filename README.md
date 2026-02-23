@@ -27,10 +27,11 @@ Plugged into the master computer handling Pure Data. Translates SLIP OSC into hi
 OSCLeader bridge;
 
 void setup() {
-  Serial.begin(1000000); 
+    Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+
   // Start on Channel 1, auto-hopping disabled
-  bridge.begin(Serial, 1000000, 1, false);
-  bridge.setIndicator(2); // LED on pin 2 flashes on traffic
+  bridge.begin(Serial, 230400, 1, false);
+  bridge.setIndicator(2); // LED on pin 2 flashes on traffic. change it to the builtin led of your esp
 }
 
 void loop() {
@@ -47,7 +48,7 @@ OSCFollower bridge2;
 
 void setup() {
   // Channel 1, USB SLIP = true, Baud = 1000000
-  bridge2.begin(1, true, 1000000); 
+  bridge2.begin(1, true, 230400); 
 }
 
 void loop() {
