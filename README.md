@@ -1,8 +1,4 @@
-Putting the examples right on the front page of your repository is the ultimate "developer-friendly" move. It proves to anyone visiting your GitHub that your library is incredibly easy to use before they even click download.
 
-They can look at the README, see that it only takes 10 lines of code to build a zero-latency bridge, and instantly realize the value of your project.
-
-Here is your complete, final **`README.md`** with the dynamic logo, the updated feature list, and the three quick-start examples perfectly formatted in Markdown.
 
 ---
 
