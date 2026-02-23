@@ -2,11 +2,37 @@
 #include <OSCMessage.h>
 
 OSCFollower node;
+const int LED_PIN = 2; // Standard ESP32 built-in LED
+
+// 1. The function that runs when "/test" is received
+void controlLED(OSCMessage &msg) {
+  // Check if Pure Data sent a 1 or a 0
+  if (msg.isInt(0)) {
+    int state = msg.getInt(0);
+    digitalWrite(LED_PIN, state > 0 ? HIGH : LOW);
+  }
+}
+
+// 2. The callback that catches all incoming radio traffic
+void onRadioData(const uint8_t *data, int len) {
+  OSCMessage msg;
+  msg.fill(data, len); // Pour the raw radio array into CNMAT
+  
+  if (!msg.hasError()) {
+    // If the address is "/test", trigger the controlLED function
+    msg.dispatch("/test", controlLED); 
+  }
+}
 
 void setup() {
+  pinMode(LED_PIN, OUTPUT);
+
   // Channel 1, USB SLIP = false (Battery Mode)
   node.begin(1, false); 
-  node.enableHeartbeat(1000, 42); // Send ID 42 every 1 sec
+  node.enableHeartbeat(1000, 42); 
+  
+  // Attach the listener
+  node.onReceive(onRadioData);
 }
 
 void loop() {
