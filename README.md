@@ -35,6 +35,7 @@ A zero-latency, router-less wireless network bridge for live performance. Connec
 
 ### 1. Leader
 Plugged into the master computer handling Pure Data. Translates SLIP OSC into high-speed radio broadcasts.
+Its the DIRECTOR. it sends to every other device and receives from every other device, passing everything to your computer.
 ```cpp
 #include <LEADER.h>
 OSCLeader leader;
@@ -58,7 +59,7 @@ void loop() {
 ```
 
 ### 2. Tethered Follower
-Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way SLIP-to-Radio bridge.
+Plugged into a secondary computer. Acts as a flawless two-way SLIP-to-Radio bridge.
 ```cpp
 #include <LEADER.h>
 
@@ -78,7 +79,8 @@ void loop() {
 ```
 
 ### 3. Standalone Sensor Follower
-Running on a battery, reading a sensor, and correctly assembling the array for ESP-NOW using the built-in CNMAT adaptor.
+Standalone... not plugged to a computer (or plugged just for power) read sensors and/or play with actuators.
+
 ```cpp
 #include <LEADER.h>
 #include <OSCMessage.h>
