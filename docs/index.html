@@ -100,8 +100,8 @@
             
             <div class="flex items-center gap-8">
                 <div class="w-24 h-24 relative flex-shrink-0">
-                    <img src="LOGO_LIGHT.png" id="logo-light" class="absolute inset-0 w-full h-full object-contain" alt="Light Logo">
-                    <img src="LOGO_DARK.png" id="logo-dark" class="absolute inset-0 w-full h-full object-contain" alt="Dark Logo">
+                    <img src="images/LOGO_LIGHT.png" id="logo-light" class="absolute inset-0 w-full h-full object-contain" alt="Light Logo">
+                    <img src="images/LOGO_DARK.png" id="logo-dark" class="absolute inset-0 w-full h-full object-contain" alt="Dark Logo">
                 </div>
                 <h1 class="text-6xl md:text-8xl leading-none">LEADER</h1>
             </div>
@@ -325,78 +325,60 @@ follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
                 <div class="grid grid-cols-1 gap-12">
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The Leader Bridge</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer handling Pure Data.</p>
-                        <pre><code>#include &lt;LEADER.h&gt;
-
-OSCLeader bridge;
+                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer. Its the DIRECTOR. it sends to every other device and receives from every other device, passing everything to your computer.</p>
+                        <pre><code>#include <LEADER.h>
+OSCLeader leader;
 
 void setup() {
-  Serial.begin(1000000); 
-  bridge.begin(Serial, 1000000, 1, false);
-  bridge.setIndicator(2); // LED on pin 2 flashes on traffic
+  Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+  // Initialize the LEADER on Channel 1, autoHop = false
+  leader.begin(Serial, 230400, 1, false); 
+  // Enable the built-in LED, blink for 40ms, using active-LOW (true for XIAO...)
+  // blink when LEADER is sending data to FOLLOWERS
+  leader.setIndicator(LED_BUILTIN, 40, true);
 }
 
 void loop() {
-  bridge.update();
+// The library handles all the data, routing, and LED blinking internally!
+  leader.update();
+
+  // CIAO! :O)
+
 }</code></pre>
                     </div>
 
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Tethered Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way SLIP-to-Radio bridge.</p>
-                        <pre><code>#include &lt;LEADER.h&gt;
+                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer. Acts as a flawless two-way SLIP-to-Radio bridge. This device can also have sensors and actuators</p>
+                        <pre><code>#include <LEADER.h>
 
-OSCFollower bridge2;
+OSCFollower theothercomputer;
 
 void setup() {
-  // Channel 1, USB SLIP = true, Baud = 1000000
-  bridge2.begin(1, true, 1000000); 
+  // Channel 1, USB SLIP = true, Baud = 1000000 is max...
+  theothercomputer.begin(1, true, 230400); 
 }
 
 void loop() {
   // Silently routes USB to Radio and Radio to USB
-  bridge2.update();
+  theothercomputer.update();
+
+  // CIAO :O)
 }</code></pre>
                     </div>
 
                     <div>
-                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Sensor Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Running on a battery, reading a sensor, and correctly assembling the array for ESP-NOW.</p>
-                        <pre><code>#include <LEADER.h>
-#include <OSCMessage.h>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Standalone... not plugged to a computer (or plugged just for power) read sensor and/or play with actuators.</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
+#include &lt;OSCMessage.h&gt;
 
 OSCFollower node;
-const int LED_PIN = 2; // Standard ESP32 built-in LED
-
-// 1. The function that runs when "/test" is received
-void controlLED(OSCMessage &msg) {
-  // Check if Pure Data sent a 1 or a 0
-  if (msg.isInt(0)) {
-    int state = msg.getInt(0);
-    digitalWrite(LED_PIN, state > 0 ? HIGH : LOW);
-  }
-}
-
-// 2. The callback that catches all incoming radio traffic
-void onRadioData(const uint8_t *data, int len) {
-  OSCMessage msg;
-  msg.fill(data, len); // Pour the raw radio array into CNMAT
-  
-  if (!msg.hasError()) {
-    // If the address is "/test", trigger the controlLED function
-    msg.dispatch("/test", controlLED); 
-  }
-}
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
-
   // Channel 1, USB SLIP = false (Battery Mode)
   node.begin(1, false); 
-  node.enableHeartbeat(1000, 42); 
-  
-  // Attach the listener
-  node.onReceive(onRadioData);
+  node.enableHeartbeat(1000, 42); // Send ID 42 every 1 sec
 }
 
 void loop() {
