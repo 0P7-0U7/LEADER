@@ -62,16 +62,18 @@ Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way S
 ```cpp
 #include <LEADER.h>
 
-OSCFollower bridge2;
+OSCFollower theothercomputer;
 
 void setup() {
-  // Channel 1, USB SLIP = true, Baud = 1000000
-  bridge2.begin(1, true, 230400); 
+  // Channel 1, USB SLIP = true, Baud = 1000000 is max...
+  theothercomputer.begin(1, true, 230400); 
 }
 
 void loop() {
   // Silently routes USB to Radio and Radio to USB
-  bridge2.update();
+  theothercomputer.update();
+
+  // CIAO :O)
 }
 ```
 
