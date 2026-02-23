@@ -33,23 +33,27 @@ A zero-latency, router-less wireless network bridge for live performance. Connec
 
 ## Quick Start Implementation
 
-### 1. The Leader Bridge
+### 1. Leader
 Plugged into the master computer handling Pure Data. Translates SLIP OSC into high-speed radio broadcasts.
 ```cpp
 #include <LEADER.h>
-
-OSCLeader bridge;
+OSCLeader leader;
 
 void setup() {
-    Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
-
-  // Start on Channel 1, auto-hopping disabled
-  bridge.begin(Serial, 230400, 1, false);
-  bridge.setIndicator(2); // LED on pin 2 flashes on traffic. change it to the builtin led of your esp
+  Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+  // Initialize the LEADER on Channel 1, autoHop = false
+  leader.begin(Serial, 230400, 1, false); 
+  // Enable the built-in LED, blink for 40ms, using active-LOW (true for XIAO...)
+  // blink when LEADER is sending data to FOLLOWERS
+  leader.setIndicator(LED_BUILTIN, 40, true);
 }
 
 void loop() {
-  bridge.update();
+// The library handles all the data, routing, and LED blinking internally!
+  leader.update();
+
+  // CIAO! :O)
+
 }
 ```
 
