@@ -17,6 +17,20 @@ A zero-latency, router-less wireless network bridge for live performance. Connec
 
 ---
 
+##  System Commands
+
+| Address | Args | Description |
+| :--- | :---: | :--- |
+| `/leader/ping` | - | Returns telemetry: Channel, Uptime, Heap, Sent, Dropped. |
+| `/leader/hop` | - | Leader forces network to find cleanest channel and migrate. |
+| `/sys/ping` | int | Sent from Leader. Sets heartbeat MS for all Followers (0 = OFF) |
+| `/sys/pong` | int | Automatic Follower reply containing its unique node ID. |
+
+
+
+
+
+
 ## Quick Start Implementation
 
 ### 1. The Leader Bridge
