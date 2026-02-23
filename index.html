@@ -326,36 +326,44 @@ follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The Leader Bridge</h3>
                         <p class="text-sm mb-4 opacity-70">Plugged into the master computer handling Pure Data.</p>
-                        <pre><code>#include &lt;LEADER.h&gt;
-
-OSCLeader bridge;
+                        <pre><code>#include <LEADER.h>
+OSCLeader leader;
 
 void setup() {
-  Serial.begin(1000000); 
-  bridge.begin(Serial, 1000000, 1, false);
-  bridge.setIndicator(2); // LED on pin 2 flashes on traffic
+  Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+  // Initialize the LEADER on Channel 1, autoHop = false
+  leader.begin(Serial, 230400, 1, false); 
+  // Enable the built-in LED, blink for 40ms, using active-LOW (true for XIAO...)
+  // blink when LEADER is sending data to FOLLOWERS
+  leader.setIndicator(LED_BUILTIN, 40, true);
 }
 
 void loop() {
-  bridge.update();
+// The library handles all the data, routing, and LED blinking internally!
+  leader.update();
+
+  // CIAO! :O)
+
 }</code></pre>
                     </div>
 
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Tethered Follower</h3>
                         <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way SLIP-to-Radio bridge.</p>
-                        <pre><code>#include &lt;LEADER.h&gt;
+                        <pre><code>#include <LEADER.h>
 
-OSCFollower bridge2;
+OSCFollower theothercomputer;
 
 void setup() {
-  // Channel 1, USB SLIP = true, Baud = 1000000
-  bridge2.begin(1, true, 1000000); 
+  // Channel 1, USB SLIP = true, Baud = 1000000 is max...
+  theothercomputer.begin(1, true, 230400); 
 }
 
 void loop() {
   // Silently routes USB to Radio and Radio to USB
-  bridge2.update();
+  theothercomputer.update();
+
+  // CIAO :O)
 }</code></pre>
                     </div>
 
