@@ -325,7 +325,7 @@ follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
                 <div class="grid grid-cols-1 gap-12">
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The Leader Bridge</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer handling Pure Data.</p>
+                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer. Its the DIRECTOR. it sends to every other device and receives from every other device, passing everything to your computer.</p>
                         <pre><code>#include <LEADER.h>
 OSCLeader leader;
 
@@ -349,7 +349,7 @@ void loop() {
 
                     <div>
                         <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Tethered Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer (Visuals/MaxMSP). Acts as a flawless two-way SLIP-to-Radio bridge.</p>
+                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer. Acts as a flawless two-way SLIP-to-Radio bridge. This device can also have sensors and actuators</p>
                         <pre><code>#include <LEADER.h>
 
 OSCFollower theothercomputer;
@@ -368,8 +368,8 @@ void loop() {
                     </div>
 
                     <div>
-                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Sensor Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Running on a battery, reading a sensor, and correctly assembling the array for ESP-NOW.</p>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Standalone... not plugged to a computer (or plugged just for power) read sensor and/or play with actuators.</p>
                         <pre><code>#include &lt;LEADER.h&gt;
 #include &lt;OSCMessage.h&gt;
 
