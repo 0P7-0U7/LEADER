@@ -23,6 +23,8 @@ A zero-latency, router-less wireless network bridge for live performance. Connec
 | :--- | :---: | :--- |
 | `/leader/ping` | - | Returns telemetry: Channel, Uptime, Heap, Sent, Dropped. |
 | `/leader/hop` | - | Leader forces network to find cleanest channel and migrate. |
+| `/leader/nodes` | - | Requests Leader to transmit the registry of all active connected nodes. |
+| `/sys/node` | int, int | Leader reply containing Follower Node ID and milliseconds since last seen. |
 | `/sys/ping` | int | Sent from Leader. Sets heartbeat MS for all Followers (0 = OFF) |
 | `/sys/pong` | int | Automatic Follower reply containing its unique node ID. |
 
@@ -33,6 +35,9 @@ A zero-latency, router-less wireless network bridge for live performance. Connec
 
 ## Quick Start Implementation
 
+**ESP32 Hardware Compatibility:**
+- **100% Variant Agnostic:** Native ESP-NOW architecture enables LEADER to run cleanly on all chips (ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6).
+
 ### 1. Leader
 Plugged into the master computer handling Pure Data. Translates SLIP OSC into high-speed radio broadcasts.
 Its the DIRECTOR. it sends to every other device and receives from every other device, passing everything to your computer.
@@ -40,21 +45,25 @@ Its the DIRECTOR. it sends to every other device and receives from every other d
 #include <LEADER.h>
 OSCLeader leader;
 
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 2
+#endif
+
 void setup() {
-  Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+  Serial.begin(230400); // enough is enough. pd[comport] limit seems to be
+                        // 230400
   // Initialize the LEADER on Channel 1, autoHop = false
-  leader.begin(Serial, 230400, 1, false); 
-  // Enable the built-in LED, blink for 40ms, using active-LOW (true for XIAO...)
-  // blink when LEADER is sending data to FOLLOWERS
+  leader.begin(Serial, 230400, 1, false);
+  // Enable the built-in LED, blink for 40ms, using active-LOW (true for
+  // XIAO...) blink when LEADER is sending data to FOLLOWERS
   leader.setIndicator(LED_BUILTIN, 40, true);
 }
 
 void loop() {
-// The library handles all the data, routing, and LED blinking internally!
+  // The library handles all the data, routing, and LED blinking internally!
   leader.update();
 
   // CIAO! :O)
-
 }
 ```
 
@@ -100,11 +109,12 @@ void controlLED(OSCMessage &msg) {
 // 2. The callback that catches all incoming radio traffic
 void onRadioData(const uint8_t *data, int len) {
   OSCMessage msg;
-  msg.fill(data, len); // Pour the raw radio array into CNMAT
-  
+  msg.fill(const_cast<uint8_t *>(data),
+           len); // Pour the raw radio array into CNMAT
+
   if (!msg.hasError()) {
     // If the address is "/test", trigger the controlLED function
-    msg.dispatch("/test", controlLED); 
+    msg.dispatch("/test", controlLED);
   }
 }
 
@@ -112,9 +122,9 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   // Channel 1, USB SLIP = false (Battery Mode)
-  node.begin(1, false); 
-  node.enableHeartbeat(1000, 42); 
-  
+  node.begin(1, false);
+  node.enableHeartbeat(1000, 42);
+
   // Attach the listener
   node.onReceive(onRadioData);
 }
@@ -126,14 +136,14 @@ void loop() {
   static unsigned long lastSend = 0;
   if (millis() - lastSend > 50) {
     lastSend = millis();
-    
+
     OSCMessage msg("/sensor/pot");
-    msg.add(analogRead(34));
+    msg.add((int32_t)analogRead(34));
 
     OSCBuffer buf;
     msg.send(buf);
     buf.end(); // Assemble and pad the array!
-    
+
     node.send(buf.buffer, buf.length);
   }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;700&display=swap');
-        
+
         :root {
             --bg: #ffffff;
             --fg: #000000;
@@ -30,7 +31,8 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        pre, code {
+        pre,
+        code {
             font-family: 'JetBrains Mono', monospace;
             border-radius: 0 !important;
         }
@@ -58,61 +60,112 @@
             border-bottom: 1px solid transparent;
             transition: border-color 0.3s;
         }
+
         .sidebar-link:hover {
             border-bottom: 1px solid var(--fg);
         }
 
         /* Tables */
-        table { border-collapse: collapse; width: 100%; }
-        th, td {
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
             border: 1px solid var(--border-color);
             padding: 0.75rem;
             text-align: left;
             transition: border-color 0.3s;
         }
-        th { background-color: var(--fg); color: var(--bg); transition: background-color 0.3s, color 0.3s; }
+
+        th {
+            background-color: var(--fg);
+            color: var(--bg);
+            transition: background-color 0.3s, color 0.3s;
+        }
 
         /* Headers & Footer Border */
-        h1, h2, h3, h4, footer {
+        h1,
+        h2,
+        h3,
+        h4,
+        footer {
             border-color: var(--border-color);
             transition: border-color 0.3s;
         }
-        h1, h2, h3, h4 { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
         /* Theme Toggling Logic */
-        #logo-dark, #sun-icon { display: none; }
-        #logo-light, #moon-icon { display: block; }
+        #logo-dark,
+        #sun-icon {
+            display: none;
+        }
 
-        body.dark-mode #logo-dark { display: block; }
-        body.dark-mode #logo-light { display: none; }
-        body.dark-mode #sun-icon { display: block; }
-        body.dark-mode #moon-icon { display: none; }
+        #logo-light,
+        #moon-icon {
+            display: block;
+        }
+
+        body.dark-mode #logo-dark {
+            display: block;
+        }
+
+        body.dark-mode #logo-light {
+            display: none;
+        }
+
+        body.dark-mode #sun-icon {
+            display: block;
+        }
+
+        body.dark-mode #moon-icon {
+            display: none;
+        }
 
         /* Invert the black tag in dark mode */
-        body.dark-mode .bg-black { background-color: #ffffff; color: #000000; }
-
+        body.dark-mode .bg-black {
+            background-color: #ffffff;
+            color: #000000;
+        }
     </style>
 </head>
+
 <body class="p-6 md:p-12">
 
     <header class="mb-16 border-b-4 pb-8 border-[var(--border-color)]">
         <div class="flex justify-between items-center mb-8 flex-wrap gap-8">
-            
+
             <div class="flex items-center gap-8">
                 <div class="w-24 h-24 relative flex-shrink-0">
-                    <img src="images/LOGO_LIGHT.png" id="logo-light" class="absolute inset-0 w-full h-full object-contain" alt="Light Logo">
-                    <img src="images/LOGO_DARK.png" id="logo-dark" class="absolute inset-0 w-full h-full object-contain" alt="Dark Logo">
+                    <img src="images/LOGO_LIGHT.png" id="logo-light"
+                        class="absolute inset-0 w-full h-full object-contain" alt="Light Logo">
+                    <img src="images/LOGO_DARK.png" id="logo-dark" class="absolute inset-0 w-full h-full object-contain"
+                        alt="Dark Logo">
                 </div>
                 <h1 class="text-6xl md:text-8xl leading-none">LEADER</h1>
             </div>
 
             <div class="text-right flex flex-col items-end gap-6">
-                 <button id="theme-toggle" class="focus:outline-none p-2 border-sharp hover:bg-[var(--fg)] hover:text-[var(--bg)] transition-colors cursor-pointer">
-                    <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                <button id="theme-toggle"
+                    class="focus:outline-none p-2 border-sharp hover:bg-[var(--fg)] hover:text-[var(--bg)] transition-colors cursor-pointer">
+                    <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                     </svg>
-                    <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                 </button>
                 <div>
@@ -124,16 +177,17 @@
 
         <p class="text-xl uppercase tracking-widest">High-Performance OSC over ESP-NOW System</p>
         <div class="mt-8 flex flex-wrap gap-4 text-sm font-bold uppercase">
-            <span class="border-sharp px-4 py-1">Build v1.2.0</span>
+            <span class="border-sharp px-4 py-1">Build v1.3.0</span>
             <span class="border-sharp px-4 py-1">Native USB Enabled</span>
             <span class="border-sharp px-4 py-1 bg-black text-white transition-colors">CNMAT Compatible</span>
         </div>
     </header>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
-        
+
         <aside class="md:col-span-1">
             <nav class="sticky top-12 space-y-4 uppercase text-xs font-bold tracking-tighter">
+                <a href="#download" class="sidebar-link">00. Download - Install</a>
                 <a href="#logic" class="sidebar-link">01. Architecture</a>
                 <a href="#leader" class="sidebar-link">02. OSCLeader Class</a>
                 <a href="#follower" class="sidebar-link">03. OSCFollower Class</a>
@@ -146,26 +200,92 @@
 
         <main class="md:col-span-3 space-y-24">
 
+            <section id="download">
+                <h2 class="text-3xl mb-6">00. Download - Install</h2>
+                <div class="border-sharp p-8 bg-[var(--code-bg)]">
+                    <p class="mb-4 text-sm font-bold uppercase tracking-widest">ESP32 Hardware Compatibility:</p>
+                    <ul class="list-disc list-inside mb-8 text-sm opacity-90 space-y-2">
+                        <li><strong>100% Variant Agnostic:</strong> Native ESP-NOW architecture enables LEADER to run
+                            cleanly on all chips (ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6).</li>
+                    </ul>
+                    <p class="mb-4 text-sm font-bold uppercase tracking-widest">Get the latest release directly from
+                        GitHub:</p>
+                    <a href="https://github.com/0P7-0U7/LEADER/releases/latest" target="_blank"
+                        class="inline-block border-sharp px-6 py-3 bg-[var(--fg)] text-[var(--bg)] font-bold uppercase hover:bg-transparent hover:text-[var(--fg)] transition-colors">
+                        Download Last Release
+                    </a>
+                    <p class="mt-6 text-sm opacity-70">Install via the Arduino IDE Library Manager (Sketch > Include
+                        Library > Add .ZIP Library).</p>
+                </div>
+            </section>
+
             <section id="logic">
                 <h2 class="text-3xl mb-6">01. Architecture</h2>
                 <p class="mb-6 max-w-2xl">
-                    LEADER is a specialized networking library for ESP32. It facilitates a zero-config bridge between <strong>Serial SLIP OSC</strong> (Pure Data/MaxMSP) and <strong>Wireless ESP-NOW</strong>. Developed by OPT-OUT for ultra-low-latency artistic environments.
+                    LEADER is a specialized networking library for ESP32. It facilitates a zero-config bridge between
+                    <strong>Serial SLIP OSC</strong> (Pure Data/MaxMSP) and <strong>Wireless ESP-NOW</strong>. Developed
+                    by OPT-OUT for ultra-low-latency artistic environments.
                 </p>
-                
-                
+
+                <div class="mb-12 p-8 border-sharp bg-[var(--code-bg)] overflow-x-auto">
+                    <div
+                        class="min-w-[600px] flex items-center justify-between gap-4 font-mono text-sm font-bold uppercase text-center">
+
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="border-sharp p-4 bg-[var(--bg)]">Computer A<br><span
+                                    class="text-xs opacity-60">Pure Data</span></div>
+                            <div class="text-xs opacity-60">USB SLIP</div>
+                            <div
+                                class="border-sharp p-4 bg-[var(--fg)] text-[var(--bg)] shadow-[4px_4px_0_var(--fg)] transition-colors">
+                                LEADER</div>
+                        </div>
+
+                        <div class="flex-grow flex flex-col items-center justify-center opacity-70">
+                            <span>ESP-NOW</span>
+                            <span class="tracking-[0.5em] font-bold">≈≈≈≈≈≈≈></span>
+                        </div>
+
+                        <div class="flex flex-col gap-6 w-64 pr-16">
+                            <div
+                                class="border-sharp p-3 bg-[var(--bg)] flex justify-between items-center relative transition-colors">
+                                <span>Follower</span>
+                                <span
+                                    class="text-xs border-sharp px-2 py-1 bg-[var(--code-bg)] transition-colors">BATTERY</span>
+                                <div
+                                    class="absolute -right-24 top-1/2 -translate-y-1/2 text-xs opacity-60 text-left leading-tight font-normal">
+                                    -> Sensors<br>-> LEDs
+                                </div>
+                            </div>
+
+                            <div
+                                class="border-sharp p-3 bg-[var(--bg)] flex justify-between items-center relative transition-colors">
+                                <span>Follower</span>
+                                <span
+                                    class="text-xs border-sharp px-2 py-1 bg-[var(--code-bg)] transition-colors">USB</span>
+                                <div
+                                    class="absolute -right-24 top-1/2 -translate-y-1/2 text-xs opacity-60 text-left leading-tight font-normal">
+                                    -> Computer B<br>(Resolume)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-0 border-sharp">
                     <div class="p-8 border-b sm:border-b-0 sm:border-r border-[var(--border-color)]">
                         <h3 class="text-lg mb-2">The Leader</h3>
-                        <p class="text-sm">Stationary master node. Plugged into the main PC via USB. Translates SLIP OSC into high-speed radio broadcasts. Dictates channel hopping and telemetry.</p>
+                        <p class="text-sm">Stationary master node. Plugged into the main PC via USB. Translates SLIP OSC
+                            into high-speed radio broadcasts. Dictates channel hopping and telemetry.</p>
                     </div>
                     <div class="p-8 border-b sm:border-b-0 sm:border-r border-[var(--border-color)]">
                         <h3 class="text-lg mb-2">Follower (Sensor)</h3>
-                        <p class="text-sm">Standalone, battery-powered node. Reads physical sensors/pins and beams data directly to the Leader. Uses zero USB CPU overhead.</p>
+                        <p class="text-sm">Standalone, battery-powered node. Reads physical sensors/pins and beams data
+                            directly to the Leader. Uses zero USB CPU overhead.</p>
                     </div>
                     <div class="p-8">
                         <h3 class="text-lg mb-2">Follower (Tethered)</h3>
-                        <p class="text-sm">Plugged into a secondary PC via USB. Acts as a flawless two-way bridge between computers with zero Wi-Fi router latency.</p>
+                        <p class="text-sm">Plugged into a secondary PC via USB. Acts as a flawless two-way bridge
+                            between computers with zero Wi-Fi router latency.</p>
                     </div>
                 </div>
             </section>
@@ -174,16 +294,25 @@
                 <h2 class="text-3xl mb-6">02. OSCLeader Class</h2>
                 <div class="space-y-6">
                     <div class="border-sharp p-6">
-                        <code class="block text-lg font-bold">void begin(Stream& port, long baud, uint8_t channel, bool autoHop)</code>
-                        <p class="text-sm mt-2 opacity-70">Initializes ESP-NOW and starts the Serial-to-Radio bridge. Usually attached to <code>Serial</code> at <code>1000000</code> baud.</p>
+                        <code
+                            class="block text-lg font-bold">void begin(Stream& port, long baud, uint8_t channel, bool autoHop)</code>
+                        <p class="text-sm mt-2 opacity-70">Initializes ESP-NOW and starts the Serial-to-Radio bridge.
+                            Usually attached to <code>Serial</code> at <code>1000000</code> baud.</p>
                     </div>
                     <div class="border-sharp p-6">
                         <code class="block text-lg font-bold">bool update()</code>
-                        <p class="text-sm mt-2 opacity-70">Processes the Serial SLIP buffer and handles wireless synchronization. Must be called in every loop.</p>
+                        <p class="text-sm mt-2 opacity-70">Processes the Serial SLIP buffer and handles wireless
+                            synchronization. Must be called in every loop.</p>
                     </div>
                     <div class="border-sharp p-6">
                         <code class="block text-lg font-bold">void setIndicator(int pin)</code>
-                        <p class="text-sm mt-2 opacity-70">Assigns a hardware LED pin to flash dynamically on successful packet transmission/reception.</p>
+                        <p class="text-sm mt-2 opacity-70">Assigns a hardware LED pin to flash dynamically on successful
+                            packet transmission/reception.</p>
+                    </div>
+                    <div class="border-sharp p-6">
+                        <code class="block text-lg font-bold">void sendNodeRegistry()</code>
+                        <p class="text-sm mt-2 opacity-70">Transmits the current registry of active nodes to the Host
+                            Computer.</p>
                     </div>
                 </div>
             </section>
@@ -192,16 +321,21 @@
                 <h2 class="text-3xl mb-6">03. OSCFollower Class</h2>
                 <div class="space-y-6">
                     <div class="border-sharp p-6">
-                        <code class="block text-lg font-bold">void begin(uint8_t channel, bool enableUSB, long baudRate)</code>
-                        <p class="text-sm mt-2 opacity-70">Starts as a wireless client. Set <code>enableUSB</code> to true to activate Tethered Bridge mode and set your desired <code>baudRate</code>.</p>
+                        <code
+                            class="block text-lg font-bold">void begin(uint8_t channel, bool enableUSB, long baudRate)</code>
+                        <p class="text-sm mt-2 opacity-70">Starts as a wireless client. Set <code>enableUSB</code> to
+                            true to activate Tethered Bridge mode and set your desired <code>baudRate</code>.</p>
                     </div>
                     <div class="border-sharp p-6">
                         <code class="block text-lg font-bold">void send(const uint8_t *data, int len)</code>
-                        <p class="text-sm mt-2 opacity-70">Broadcasts raw formatted OSC byte arrays out to the wireless network.</p>
+                        <p class="text-sm mt-2 opacity-70">Broadcasts raw formatted OSC byte arrays out to the wireless
+                            network.</p>
                     </div>
                     <div class="border-sharp p-6">
                         <code class="block text-lg font-bold">void enableHeartbeat(uint32_t ms, uint32_t id)</code>
-                        <p class="text-sm mt-2 opacity-70">Starts an automated <code>/sys/pong</code> service. The <code>id</code> is sent as a lightweight integer to keep network traffic minimal.</p>
+                        <p class="text-sm mt-2 opacity-70">Starts an automated <code>/sys/pong</code> service. The
+                            <code>id</code> is sent as a lightweight integer to keep network traffic minimal.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -209,12 +343,18 @@
             <section id="miniosc">
                 <h2 class="text-3xl mb-6">04. MiniOSC Engine</h2>
                 <p class="mb-6 max-w-2xl">
-                    While user data relies on standard OSC libraries, the LEADER system's internal telemetry is powered by <strong>MiniOSC</strong>. It is a ruthlessly efficient, zero-dynamic-memory parser running entirely in the background. 
+                    While user data relies on standard OSC libraries, the LEADER system's internal telemetry is powered
+                    by <strong>MiniOSC</strong>. It is a ruthlessly efficient, zero-dynamic-memory parser running
+                    entirely in the background.
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <h4 class="text-sm font-bold mb-2">Background Telemetry</h4>
-                        <p class="text-sm opacity-80">It handles core network commands like <code>/sys/ping</code>, <code>/leader/hop</code>, and heartbeats. By strictly restricting its payloads to 32-bit integers, it keeps network administrative traffic microscopic (often just 4 to 8 bytes per packet) to prevent airwave congestion.</p>
+                        <p class="text-sm opacity-80">It handles core network commands like <code>/sys/ping</code>,
+                            <code>/leader/hop</code>, and heartbeats. By strictly restricting its payloads to 32-bit
+                            integers, it keeps network administrative traffic microscopic (often just 4 to 8 bytes per
+                            packet) to prevent airwave congestion.
+                        </p>
                     </div>
                     <div class="border-l-4 border-[var(--border-color)] pl-4">
                         <pre class="bg-transparent border-0 p-0 text-sm"><code>// Internal Pack Function
@@ -229,12 +369,17 @@ MiniOSC::extract(data, len, address, outArray, maxArgs);</code></pre>
             <section id="cnmat">
                 <h2 class="text-3xl mb-6">05. CNMAT Integration</h2>
                 <p class="mb-6 max-w-2xl">
-                    Standard CNMAT OSC libraries cannot natively transmit over ESP-NOW. CNMAT is designed to stream data byte-by-byte (via the Arduino <code>Print</code> class), whereas ESP-NOW demands strictly formatted, pre-assembled memory arrays. 
+                    Standard CNMAT OSC libraries cannot natively transmit over ESP-NOW. CNMAT is designed to stream data
+                    byte-by-byte (via the Arduino <code>Print</code> class), whereas ESP-NOW demands strictly formatted,
+                    pre-assembled memory arrays.
                 </p>
                 <div class="space-y-8">
                     <div>
                         <h4 class="text-sm font-bold mb-2">The OSCBuffer Adaptor</h4>
-                        <p class="text-sm mb-4 opacity-80">We built the <strong><code>OSCBuffer</code></strong> class to act as the universal adaptor. It safely catches the streaming bytes from CNMAT, compiles them into a contiguous radio-ready array, and explicitly pads the tail to mathematically perfect 4-byte multiples (a strict requirement for Pure Data's SLIP decoder).</p>
+                        <p class="text-sm mb-4 opacity-80">We built the <strong><code>OSCBuffer</code></strong> class to
+                            act as the universal adaptor. It safely catches the streaming bytes from CNMAT, compiles
+                            them into a contiguous radio-ready array, and explicitly pads the tail to mathematically
+                            perfect 4-byte multiples (a strict requirement for Pure Data's SLIP decoder).</p>
                         <pre><code>// 1. Create your standard CNMAT message
 OSCMessage msg("/sensor/dial");
 msg.add(3.14);
@@ -274,6 +419,16 @@ follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
                             <td>Leader forces network to find cleanest channel and migrate.</td>
                         </tr>
                         <tr>
+                            <td class="font-mono">/leader/nodes</td>
+                            <td>-</td>
+                            <td>Requests Leader to transmit the registry of all active connected nodes.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono">/sys/node</td>
+                            <td>int, int</td>
+                            <td>Leader reply containing Follower Node ID and milliseconds since last seen.</td>
+                        </tr>
+                        <tr>
                             <td class="font-mono">/sys/ping</td>
                             <td>int</td>
                             <td>Sent from Leader. Sets heartbeat MS for all Followers (0 = OFF).</td>
@@ -289,36 +444,45 @@ follower.send(myBuffer.buffer, myBuffer.length);</code></pre>
 
             <section id="quickstart">
                 <h2 class="text-3xl mb-6">07. Implementation</h2>
-                
+
                 <div class="grid grid-cols-1 gap-12">
                     <div>
-                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The Leader Bridge</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer. Its the DIRECTOR. it sends to every other device and receives from every other device, passing everything to your computer.</p>
-                        <pre><code>#include <LEADER.h>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: The
+                            Leader Bridge</h3>
+                        <p class="text-sm mb-4 opacity-70">Plugged into the master computer. Its the DIRECTOR. it sends
+                            to every other device and receives from every other device, passing everything to your
+                            computer.</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
 OSCLeader leader;
 
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 2
+#endif
+
 void setup() {
-  Serial.begin(230400); //enough is enough. pd[comport] limit seems to be 230400   
+  Serial.begin(230400); // enough is enough. pd[comport] limit seems to be
+                        // 230400
   // Initialize the LEADER on Channel 1, autoHop = false
-  leader.begin(Serial, 230400, 1, false); 
-  // Enable the built-in LED, blink for 40ms, using active-LOW (true for XIAO...)
-  // blink when LEADER is sending data to FOLLOWERS
+  leader.begin(Serial, 230400, 1, false);
+  // Enable the built-in LED, blink for 40ms, using active-LOW (true for
+  // XIAO...) blink when LEADER is sending data to FOLLOWERS
   leader.setIndicator(LED_BUILTIN, 40, true);
 }
 
 void loop() {
-// The library handles all the data, routing, and LED blinking internally!
+  // The library handles all the data, routing, and LED blinking internally!
   leader.update();
 
   // CIAO! :O)
-
 }</code></pre>
                     </div>
 
                     <div>
-                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Tethered Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer. Acts as a flawless two-way SLIP-to-Radio bridge. This device can also have sensors and actuators</p>
-                        <pre><code>#include <LEADER.h>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example:
+                            Tethered Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Plugged into a secondary computer. Acts as a flawless two-way
+                            SLIP-to-Radio bridge. This device can also have sensors and actuators</p>
+                        <pre><code>#include &lt;LEADER.h&gt;
 
 OSCFollower theothercomputer;
 
@@ -336,17 +500,46 @@ void loop() {
                     </div>
 
                     <div>
-                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example: Standalone Follower</h3>
-                        <p class="text-sm mb-4 opacity-70">Standalone... not plugged to a computer (or plugged just for power) read sensor and/or play with actuators.</p>
+                        <h3 class="text-lg mb-4 font-bold border-l-4 border-[var(--border-color)] pl-4">Example:
+                            Standalone Follower</h3>
+                        <p class="text-sm mb-4 opacity-70">Standalone... not plugged to a computer (or plugged just for
+                            power) read sensor and/or play with actuators.</p>
                         <pre><code>#include &lt;LEADER.h&gt;
 #include &lt;OSCMessage.h&gt;
 
 OSCFollower node;
+const int LED_PIN = 2; // Standard ESP32 built-in LED
+
+// 1. The function that runs when "/test" is received
+void controlLED(OSCMessage &amp;msg) {
+  // Check if Pure Data sent a 1 or a 0
+  if (msg.isInt(0)) {
+    int state = msg.getInt(0);
+    digitalWrite(LED_PIN, state &gt; 0 ? HIGH : LOW);
+  }
+}
+
+// 2. The callback that catches all incoming radio traffic
+void onRadioData(const uint8_t *data, int len) {
+  OSCMessage msg;
+  msg.fill(const_cast&lt;uint8_t *&gt;(data),
+           len); // Pour the raw radio array into CNMAT
+
+  if (!msg.hasError()) {
+    // If the address is "/test", trigger the controlLED function
+    msg.dispatch("/test", controlLED);
+  }
+}
 
 void setup() {
+  pinMode(LED_PIN, OUTPUT);
+
   // Channel 1, USB SLIP = false (Battery Mode)
-  node.begin(1, false); 
-  node.enableHeartbeat(1000, 42); // Send ID 42 every 1 sec
+  node.begin(1, false);
+  node.enableHeartbeat(1000, 42);
+
+  // Attach the listener
+  node.onReceive(onRadioData);
 }
 
 void loop() {
@@ -354,16 +547,16 @@ void loop() {
 
   // Send a sensor reading every 50ms
   static unsigned long lastSend = 0;
-  if (millis() - lastSend > 50) {
+  if (millis() - lastSend &gt; 50) {
     lastSend = millis();
-    
+
     OSCMessage msg("/sensor/pot");
-    msg.add(analogRead(34));
+    msg.add((int32_t)analogRead(34));
 
     OSCBuffer buf;
     msg.send(buf);
     buf.end(); // Assemble and pad the array!
-    
+
     node.send(buf.buffer, buf.length);
   }
 }</code></pre>
@@ -375,7 +568,8 @@ void loop() {
         </main>
     </div>
 
-    <footer class="mt-32 pt-12 border-t border-[var(--border-color)] text-xs uppercase font-bold tracking-widest flex justify-between">
+    <footer
+        class="mt-32 pt-12 border-t border-[var(--border-color)] text-xs uppercase font-bold tracking-widest flex justify-between">
         <span>LEADER OSC TOOLKIT</span>
         <span>OPT-OUT / BRUSSELS 2026</span>
     </footer>
@@ -393,7 +587,7 @@ void loop() {
 
         themeToggleBtn.addEventListener('click', () => {
             bodyElement.classList.toggle('dark-mode');
-            
+
             // Save preference
             if (bodyElement.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
@@ -404,4 +598,5 @@ void loop() {
     </script>
 
 </body>
+
 </html>

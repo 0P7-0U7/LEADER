@@ -11,3 +11,4 @@ send	KEYWORD2
 onReceive	KEYWORD2
 enableHeartbeat	KEYWORD2
 triggerHop	KEYWORD2
+sendNodeRegistry	KEYWORD2
