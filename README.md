@@ -1,3 +1,9 @@
+<p align="right">
+  <a href="https://buymeacoffee.com/optoutbrussels">
+    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee">
+  </a>
+</p>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/LOGO_DARK.png">
   <source media="(prefers-color-scheme: light)" srcset="images/LOGO_LIGHT.png">
