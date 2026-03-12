@@ -4,6 +4,15 @@
   </a>
 </p>
 
+
+## Ethical License (CNPL v4)
+LEADER is released under the **Cooperative Non-Violent Public License**. 
+
+This means you are free to use it for art, education, and civilian research. However:
+- **NO Military Use:** Use by military organizations or for weapons development is strictly prohibited.
+- **NO Surveillance:** Use for state-sponsored surveillance is prohibited.
+- **Cooperative Only:** Commercial use is reserved for worker-owned cooperatives.
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/LOGO_DARK.png">
   <source media="(prefers-color-scheme: light)" srcset="images/LOGO_LIGHT.png">
