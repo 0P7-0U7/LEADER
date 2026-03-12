@@ -19,6 +19,8 @@ This means you are free to use it for art, education, and civilian research. How
   <img alt="LEADER by OPT-OUT" src="images/LOGO_LIGHT.png" width="100%">
 </picture>
 
+##
+
 # LEADER by OPT-OUT
 **High-Performance OSC over ESP-NOW System**
 
