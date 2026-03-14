@@ -77,22 +77,12 @@ int MiniOSC::extract(const uint8_t *data, int len, const char *targetAddress,
       memcpy(&rawLen, data + offset, 4);
       int32_t blobLen = swap32(rawLen);
       offset += 4;
-      outArray[i].i =
-          blobLen; // Use 'i' to store blob length temporarily, or simply skip
-                   // reading blob content if not fully supported in simple API.
-      // Wait, we can't easily store both blob length and pointer without
-      // changing OSCValue struct memory footprint. Let's store the length in
-      // 'i' and skip the payload in offset for extraction, or wait, 's' can
-      // point to the blob. But size? Actually standard OSC blob is length (4
-      // bytes) + data + padding. Let's just point 's' to the data and 'i' to
-      // the length? No, union overlaps. We will skip blobs for now or just
-      // increase offset appropriately.
+      // Store blob length in 'i' and pointer in 's' (union overlaps, so only
+      // the pointer is preserved). Blob data is NOT null-terminated.
       int paddedLen = (blobLen + 3) & ~3;
       if (offset + paddedLen > len)
         break;
-      outArray[i].s =
-          (const char *)(data + offset); // Dangerous if they think it's
-                                         // null-terminated! But it's an option.
+      outArray[i].s = (const char *)(data + offset);
       offset += paddedLen;
     } else if (t == 'T') {
       outArray[i].b = true;

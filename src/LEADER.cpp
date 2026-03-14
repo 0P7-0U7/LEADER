@@ -13,6 +13,7 @@ void OSCLeader::begin(Stream &serialPort, long baudRate, uint8_t homeChannel,
   _instance = this;
   _serial = &serialPort;
   _homeChannel = homeChannel;
+  _autoHop = autoHop;
 
   // Configure Wi-Fi in Station Mode and disable power saving for lowest latency
   WiFi.mode(WIFI_STA);
@@ -34,6 +35,12 @@ void OSCLeader::begin(Stream &serialPort, long baudRate, uint8_t homeChannel,
   _peerInfo.channel = _homeChannel;
   _peerInfo.encrypt = false; // Security tradeoff for maximum throughput speed
   esp_now_add_peer(&_peerInfo);
+
+  // If autoHop is enabled, perform an initial channel scan at startup
+  if (_autoHop) {
+    _lastAutoHopTime = millis();
+    triggerHop();
+  }
 }
 
 void OSCLeader::setIndicator(int pin, unsigned long blinkDuration,
@@ -47,6 +54,30 @@ void OSCLeader::setIndicator(int pin, unsigned long blinkDuration,
     pinMode(_ledPin, OUTPUT);
     digitalWrite(_ledPin, _ledOffState);
   }
+}
+
+void OSCLeader::_sendSlipToSerial(const uint8_t *data, int len) {
+  // Worst-case SLIP expansion: each byte becomes 2 bytes + 2 framing bytes
+  uint8_t slipBuffer[502]; // 250 * 2 + 2
+  int slipIndex = 0;
+
+  slipBuffer[slipIndex++] = 0xC0; // SLIP END (frame start)
+  for (int i = 0; i < len; i++) {
+    if (slipIndex >= (int)sizeof(slipBuffer) - 2)
+      break; // Prevent overflow
+    if (data[i] == 0xC0) {
+      slipBuffer[slipIndex++] = 0xDB; // ESC
+      slipBuffer[slipIndex++] = 0xDC; // ESC_END
+    } else if (data[i] == 0xDB) {
+      slipBuffer[slipIndex++] = 0xDB; // ESC
+      slipBuffer[slipIndex++] = 0xDD; // ESC_ESC
+    } else {
+      slipBuffer[slipIndex++] = data[i];
+    }
+  }
+  slipBuffer[slipIndex++] = 0xC0; // SLIP END (frame end)
+
+  _serial->write(slipBuffer, slipIndex);
 }
 
 void OSCLeader::triggerHop() {
@@ -79,26 +110,7 @@ void OSCLeader::sendChannelFeedback() {
   uint8_t outBuffer[64];
   int outLen = MiniOSC::pack(outBuffer, "/leader/channel", &outVal, 1);
 
-  uint8_t slipBuffer[128];
-  int slipIndex = 0;
-
-  // SLIP Encoding (Standard RFC 1055)
-  slipBuffer[slipIndex++] = 0xC0; // END
-  for (int i = 0; i < outLen; i++) {
-    if (outBuffer[i] == 0xC0) {
-      slipBuffer[slipIndex++] = 0xDB; // ESC
-      slipBuffer[slipIndex++] = 0xDC; // ESC_END
-    } else if (outBuffer[i] == 0xDB) {
-      slipBuffer[slipIndex++] = 0xDB; // ESC
-      slipBuffer[slipIndex++] = 0xDD; // ESC_ESC
-    } else {
-      slipBuffer[slipIndex++] = outBuffer[i];
-    }
-  }
-  slipBuffer[slipIndex++] = 0xC0; // END
-
-  _serial->write(slipBuffer, slipIndex);
-  _serial->flush();
+  _sendSlipToSerial(outBuffer, outLen);
 }
 
 void OSCLeader::sendPingReply() {
@@ -119,26 +131,7 @@ void OSCLeader::sendPingReply() {
   uint8_t outBuffer[128];
   int outLen = MiniOSC::pack(outBuffer, "/leader/ping", outVals, 5);
 
-  uint8_t slipBuffer[256];
-  int slipIndex = 0;
-
-  // SLIP Encoding wrapper
-  slipBuffer[slipIndex++] = 0xC0;
-  for (int i = 0; i < outLen; i++) {
-    if (outBuffer[i] == 0xC0) {
-      slipBuffer[slipIndex++] = 0xDB;
-      slipBuffer[slipIndex++] = 0xDC;
-    } else if (outBuffer[i] == 0xDB) {
-      slipBuffer[slipIndex++] = 0xDB;
-      slipBuffer[slipIndex++] = 0xDD;
-    } else {
-      slipBuffer[slipIndex++] = outBuffer[i];
-    }
-  }
-  slipBuffer[slipIndex++] = 0xC0;
-
-  _serial->write(slipBuffer, slipIndex);
-  _serial->flush();
+  _sendSlipToSerial(outBuffer, outLen);
 }
 
 uint8_t OSCLeader::findQuietestChannel() {
@@ -178,6 +171,11 @@ void OSCLeader::updateNodeRegistry(const uint8_t *mac, uint32_t nodeID) {
     }
   }
 
+  // Compact the registry before adding if full
+  if (_nodeCount >= MAX_NODES) {
+    compactNodeRegistry();
+  }
+
   // Create new node if there is space
   if (_nodeCount < MAX_NODES) {
     memcpy(_activeNodes[_nodeCount].mac, mac, 6);
@@ -186,6 +184,23 @@ void OSCLeader::updateNodeRegistry(const uint8_t *mac, uint32_t nodeID) {
     _activeNodes[_nodeCount].active = true;
     _nodeCount++;
   }
+}
+
+void OSCLeader::compactNodeRegistry() {
+  uint8_t writeIndex = 0;
+  unsigned long currentMillis = millis();
+
+  for (uint8_t i = 0; i < _nodeCount; i++) {
+    // Keep nodes that are active and seen within the last 10 seconds
+    if (_activeNodes[i].active &&
+        (currentMillis - _activeNodes[i].lastSeen <= 10000)) {
+      if (writeIndex != i) {
+        _activeNodes[writeIndex] = _activeNodes[i];
+      }
+      writeIndex++;
+    }
+  }
+  _nodeCount = writeIndex;
 }
 
 void OSCLeader::sendNodeRegistry() {
@@ -204,29 +219,11 @@ void OSCLeader::sendNodeRegistry() {
     outVals[1].type = 'i';
     outVals[1].i = currentMillis - _activeNodes[i].lastSeen;
 
-    uint8_t outBuffer[128];
+    uint8_t outBuffer[64];
     int outLen = MiniOSC::pack(outBuffer, "/sys/node", outVals, 2);
 
-    uint8_t slipBuffer[256];
-    int slipIndex = 0;
-
-    slipBuffer[slipIndex++] = 0xC0;
-    for (int j = 0; j < outLen; j++) {
-      if (outBuffer[j] == 0xC0) {
-        slipBuffer[slipIndex++] = 0xDB;
-        slipBuffer[slipIndex++] = 0xDC;
-      } else if (outBuffer[j] == 0xDB) {
-        slipBuffer[slipIndex++] = 0xDB;
-        slipBuffer[slipIndex++] = 0xDD;
-      } else {
-        slipBuffer[slipIndex++] = outBuffer[j];
-      }
-    }
-    slipBuffer[slipIndex++] = 0xC0;
-
-    _serial->write(slipBuffer, slipIndex);
+    _sendSlipToSerial(outBuffer, outLen);
   }
-  _serial->flush();
 }
 
 bool OSCLeader::update() {
@@ -234,6 +231,35 @@ bool OSCLeader::update() {
   if (_ledPin >= 0 && _isLedOn && (millis() - _lastDataTime > _blinkDuration)) {
     digitalWrite(_ledPin, _ledOffState);
     _isLedOn = false;
+  }
+
+  // Process queued packets from ESP-NOW callback (thread-safe)
+  while (_rxTail != _rxHead) {
+    RxPacket &pkt = _rxQueue[_rxTail];
+
+    // Update Node Registry on any incoming message
+    uint32_t possibleNodeID = 0;
+    if (pkt.len > 9 &&
+        strncmp((const char *)pkt.data, "/sys/pong", 9) == 0) {
+      OSCValue pongArgs[1];
+      int pongCount =
+          MiniOSC::extract(pkt.data, pkt.len, "/sys/pong", pongArgs, 1);
+      if (pongCount > 0 && pongArgs[0].type == 'i') {
+        possibleNodeID = pongArgs[0].i;
+      }
+    }
+    updateNodeRegistry(pkt.mac, possibleNodeID);
+
+    // Forward received radio data to Host Computer via SLIP
+    _sendSlipToSerial(pkt.data, pkt.len);
+
+    _rxTail = (_rxTail + 1) % RX_QUEUE_SIZE;
+  }
+
+  // Automatic channel hopping on a periodic interval
+  if (_autoHop && (millis() - _lastAutoHopTime >= AUTO_HOP_INTERVAL)) {
+    _lastAutoHopTime = millis();
+    triggerHop();
   }
 
   bool actionTriggered = false;
@@ -283,7 +309,7 @@ bool OSCLeader::update() {
     } else if (incomingByte == 0xDB) { // SLIP ESC character
       _isEscaping = true;
     } else {
-      // Decode escaped specialized bytes inline smoothly
+      // Decode escaped specialized bytes inline
       if (_isEscaping) {
         if (incomingByte == 0xDC)
           incomingByte = 0xC0;
@@ -291,17 +317,16 @@ bool OSCLeader::update() {
           incomingByte = 0xDB;
         _isEscaping = false;
       }
-      // Populate memory tracking cache against payload limits gracefully
+      // Populate buffer against payload limits
       if (_bufferIndex < sizeof(_oscBuffer)) {
         _oscBuffer[_bufferIndex++] = incomingByte;
       } else {
-        _bufferIndex =
-            0; // Force empty and abandon malformed oversized transmissions
+        _bufferIndex = 0; // Abandon malformed oversized transmissions
       }
     }
   }
 
-  // Update UI logic indicators mapped visually via user request parameters
+  // Update LED indicator on activity
   if (actionTriggered && _ledPin >= 0) {
     digitalWrite(_ledPin, _ledOnState);
     _lastDataTime = millis();
@@ -319,41 +344,21 @@ void OSCLeader::_staticOnDataRecv(const esp_now_recv_info_t *info,
 
 void OSCLeader::_handleDataRecv(const uint8_t *mac, const uint8_t *incomingData,
                                 int len) {
-  // Update Node Registry on any incoming message
-  // If it's a pong, extract the ID, otherwise use a default ID (0) to track its
-  // MAC at least.
-  uint32_t possibleNodeID = 0;
-  if (len > 9 && strncmp((const char *)incomingData, "/sys/pong", 9) == 0) {
-    OSCValue pongArgs[1];
-    int pongCount =
-        MiniOSC::extract(incomingData, len, "/sys/pong", pongArgs, 1);
-    if (pongCount > 0 && pongArgs[0].type == 'i') {
-      possibleNodeID = pongArgs[0].i;
-    }
-  }
-  updateNodeRegistry(mac, possibleNodeID);
+  // Queue the packet for processing in update() (main loop context)
+  // This avoids serial writes from the Wi-Fi task callback context
+  uint8_t nextHead = (_rxHead + 1) % RX_QUEUE_SIZE;
+  if (nextHead == _rxTail)
+    return; // Queue full, drop packet
 
-  uint8_t slipBuffer[512]; // Safeguard maximum SLIP size expansion
-  int slipIndex = 0;
+  if (len > 250)
+    len = 250; // Clamp to ESP-NOW max
 
-  // Embed radio segment back into standard SLIP mapping protocols inline
-  slipBuffer[slipIndex++] = 0xC0;
-  for (int i = 0; i < len; i++) {
-    if (incomingData[i] == 0xC0) {
-      slipBuffer[slipIndex++] = 0xDB;
-      slipBuffer[slipIndex++] = 0xDC;
-    } else if (incomingData[i] == 0xDB) {
-      slipBuffer[slipIndex++] = 0xDB;
-      slipBuffer[slipIndex++] = 0xDD;
-    } else {
-      slipBuffer[slipIndex++] = incomingData[i];
-    }
-  }
-  slipBuffer[slipIndex++] = 0xC0;
+  RxPacket &pkt = _rxQueue[_rxHead];
+  memcpy(pkt.data, incomingData, len);
+  memcpy(pkt.mac, mac, 6);
+  pkt.len = len;
 
-  _serial->write(slipBuffer, slipIndex);
-  // 2. NO FLUSH: Removed _serial->flush() here because it
-  // causes packet fragmentation on newer ESP32 Native USB cores.
+  _rxHead = nextHead;
 }
 
 // ==========================================
@@ -406,8 +411,6 @@ void OSCFollower::enableHeartbeat(uint32_t interval, uint32_t customID) {
     _nodeID = customID;
   }
   _heartbeatEnabled = true;
-
-  // Added safety heartbeat default MAC configuration logic could map here
 }
 
 void OSCFollower::_staticOnDataRecv(const esp_now_recv_info_t *info,
@@ -418,97 +421,107 @@ void OSCFollower::_staticOnDataRecv(const esp_now_recv_info_t *info,
 
 void OSCFollower::_handleDataRecv(const uint8_t *mac,
                                   const uint8_t *incomingData, int len) {
-  _lastMessageTime = millis();
+  // Queue the packet for processing in update() (main loop context)
+  uint8_t nextHead = (_rxHead + 1) % RX_QUEUE_SIZE;
+  if (nextHead == _rxTail)
+    return; // Queue full, drop packet
 
-  // Perform a sanity check before locking onto a presumed Leader node MAC to
-  // prevent pairing bugs
-  if (!_leaderMacSet) {
-    bool isValidLeaderPacket = false;
+  if (len > 250)
+    len = 250;
 
-    // Valid packet verification: Looks for an explicit 0xFE structural hopping
-    // phrase OR a standard string OSC identifier
-    if (len == 4 && incomingData[0] == 0xFE && incomingData[1] == 0xFE &&
-        incomingData[2] == 0xFE) {
-      isValidLeaderPacket = true;
-    } else if (len > 0 && incomingData[0] == '/') {
-      isValidLeaderPacket = true;
-    }
+  RxPacket &pkt = _rxQueue[_rxHead];
+  memcpy(pkt.data, incomingData, len);
+  memcpy(pkt.mac, mac, 6);
+  pkt.len = len;
 
-    if (isValidLeaderPacket) {
-      memcpy(_leaderMac, mac, 6);
-      esp_now_peer_info_t peerInfo = {};
-      memcpy(peerInfo.peer_addr, _leaderMac, 6);
-      peerInfo.channel = _currentChannel;
-      peerInfo.encrypt = false;
-      esp_now_add_peer(&peerInfo);
-      _leaderMacSet = true;
-    }
-  }
-
-  // Check 1: Hidden Hardware Hop Command
-  if (len == 4 && incomingData[0] == 0xFE && incomingData[1] == 0xFE &&
-      incomingData[2] == 0xFE) {
-    uint8_t targetChannel = incomingData[3];
-    if (targetChannel != _currentChannel) {
-      _currentChannel = targetChannel;
-      esp_wifi_set_channel(_currentChannel, WIFI_SECOND_CHAN_NONE);
-      if (_leaderMacSet) {
-        esp_now_peer_info_t peerInfo = {};
-        memcpy(peerInfo.peer_addr, _leaderMac, 6);
-        peerInfo.channel = _currentChannel;
-        esp_now_mod_peer(&peerInfo);
-      }
-    }
-    return; // Exit directly without processing payload downstream into user
-            // loop parameters
-  }
-
-  // Intercept nested node enumeration systems globally via transparent system
-  // callbacks Quick bounds testing comparing OSC initial string headers
-  // explicitly
-  if (len > 9 && strncmp((const char *)incomingData, "/sys/ping", 9) == 0) {
-    OSCValue pingCheck[1];
-    int pingArgs =
-        MiniOSC::extract(incomingData, len, "/sys/ping", pingCheck, 1);
-
-    // Scenario A: Host transmits "/sys/ping 40" dynamically shifting refresh
-    // rate gap
-    if (pingArgs > 0 && pingCheck[0].type == 'i') {
-      int interval = pingCheck[0].i;
-      if (interval > 0) {
-        _heartbeatInterval = interval;
-        _heartbeatEnabled = true;
-      } else {
-        _heartbeatEnabled = false;
-      }
-    }
-    // Scenario B: Global host triggers a single polling snapshot sequence
-    // without variables
-    else if (pingArgs == 0) {
-      OSCValue outVal;
-      outVal.type = 'i';
-      outVal.i = _nodeID;
-      uint8_t outBuffer[64];
-      int outLen = MiniOSC::pack(outBuffer, "/sys/pong", &outVal, 1);
-      send(outBuffer, outLen);
-    }
-  }
-
-  // Dispatch raw pointer parameters passing handling responsibility down into
-  // user sketch layer implementation
-  if (_userCallback)
-    _userCallback(incomingData, len);
-
-  // Cross-route ESP-NOW data back out through hardware SLIP protocols into
-  // bridging Host Computer sequentially
-  if (_usbEnabled) {
-    _sendSlipToUSB(incomingData, len);
-  }
+  _rxHead = nextHead;
 }
 
 void OSCFollower::update() {
-  // Pass Serial polling into active background processing tracking 0xC0 SLIP
-  // breakpoints
+  // Process queued packets from ESP-NOW callback (thread-safe)
+  while (_rxTail != _rxHead) {
+    RxPacket &pkt = _rxQueue[_rxTail];
+
+    _lastMessageTime = millis();
+
+    // Perform a sanity check before locking onto a presumed Leader node MAC
+    if (!_leaderMacSet) {
+      bool isValidLeaderPacket = false;
+
+      if (pkt.len == 4 && pkt.data[0] == 0xFE && pkt.data[1] == 0xFE &&
+          pkt.data[2] == 0xFE) {
+        isValidLeaderPacket = true;
+      } else if (pkt.len > 0 && pkt.data[0] == '/') {
+        isValidLeaderPacket = true;
+      }
+
+      if (isValidLeaderPacket) {
+        memcpy(_leaderMac, pkt.mac, 6);
+        esp_now_peer_info_t peerInfo = {};
+        memcpy(peerInfo.peer_addr, _leaderMac, 6);
+        peerInfo.channel = _currentChannel;
+        peerInfo.encrypt = false;
+        esp_now_add_peer(&peerInfo);
+        _leaderMacSet = true;
+      }
+    }
+
+    // Check: Hidden Hardware Hop Command
+    if (pkt.len == 4 && pkt.data[0] == 0xFE && pkt.data[1] == 0xFE &&
+        pkt.data[2] == 0xFE) {
+      uint8_t targetChannel = pkt.data[3];
+      if (targetChannel != _currentChannel) {
+        _currentChannel = targetChannel;
+        esp_wifi_set_channel(_currentChannel, WIFI_SECOND_CHAN_NONE);
+        if (_leaderMacSet) {
+          esp_now_peer_info_t peerInfo = {};
+          memcpy(peerInfo.peer_addr, _leaderMac, 6);
+          peerInfo.channel = _currentChannel;
+          esp_now_mod_peer(&peerInfo);
+        }
+      }
+      _rxTail = (_rxTail + 1) % RX_QUEUE_SIZE;
+      continue; // Skip downstream processing for hop commands
+    }
+
+    // Intercept system ping/pong
+    if (pkt.len > 9 &&
+        strncmp((const char *)pkt.data, "/sys/ping", 9) == 0) {
+      OSCValue pingCheck[1];
+      int pingArgs =
+          MiniOSC::extract(pkt.data, pkt.len, "/sys/ping", pingCheck, 1);
+
+      if (pingArgs > 0 && pingCheck[0].type == 'i') {
+        int interval = pingCheck[0].i;
+        if (interval > 0) {
+          _heartbeatInterval = interval;
+          _heartbeatEnabled = true;
+        } else {
+          _heartbeatEnabled = false;
+        }
+      } else if (pingArgs == 0) {
+        OSCValue outVal;
+        outVal.type = 'i';
+        outVal.i = _nodeID;
+        uint8_t outBuffer[64];
+        int outLen = MiniOSC::pack(outBuffer, "/sys/pong", &outVal, 1);
+        send(outBuffer, outLen);
+      }
+    }
+
+    // Dispatch to user callback
+    if (_userCallback)
+      _userCallback(pkt.data, pkt.len);
+
+    // Forward to USB if tethered
+    if (_usbEnabled) {
+      _sendSlipToUSB(pkt.data, pkt.len);
+    }
+
+    _rxTail = (_rxTail + 1) % RX_QUEUE_SIZE;
+  }
+
+  // Handle serial input for tethered mode
   if (_usbEnabled) {
     _handleSerial();
   }
@@ -539,11 +552,14 @@ void OSCFollower::_sendSlipToUSB(const uint8_t *data, int len) {
   if (len == 0 || len % 4 != 0)
     return;
 
-  uint8_t slipBuffer[512];
+  // Worst-case SLIP expansion: each byte becomes 2 bytes + 2 framing bytes
+  uint8_t slipBuffer[502]; // 250 * 2 + 2
   int slipIndex = 0;
 
   slipBuffer[slipIndex++] = 0xC0;
   for (int i = 0; i < len; i++) {
+    if (slipIndex >= (int)sizeof(slipBuffer) - 2)
+      break; // Prevent overflow
     if (data[i] == 0xC0) {
       slipBuffer[slipIndex++] = 0xDB;
       slipBuffer[slipIndex++] = 0xDC;
@@ -565,8 +581,6 @@ void OSCFollower::_handleSerial() {
 
     if (c == 0xC0) {
       if (_serialRxLen > 0) {
-        // Successful isolated segment captured intact; bridge immediately to
-        // Leader MAC node transparently
         if (_leaderMacSet) {
           esp_now_send(_leaderMac, _serialRxBuf, _serialRxLen);
         }
@@ -577,19 +591,16 @@ void OSCFollower::_handleSerial() {
       _serialEscaping = true;
     } else {
       if (_serialEscaping) {
-        // Rollback explicitly nested 0xDC/0xDD structures mapped from incoming
-        // architecture definitions
         if (c == 0xDC)
           c = 0xC0;
         else if (c == 0xDD)
           c = 0xDB;
         _serialEscaping = false;
       }
-      if (_serialRxLen < sizeof(_serialRxBuf)) {
+      if (_serialRxLen < (int)sizeof(_serialRxBuf)) {
         _serialRxBuf[_serialRxLen++] = c;
       } else {
-        _serialRxLen = 0; // Terminate overflowing oversized segments gracefully
-                          // returning cache back dynamically
+        _serialRxLen = 0; // Abandon oversized segments
       }
     }
   }

@@ -297,7 +297,9 @@
                         <code
                             class="block text-lg font-bold">void begin(Stream& port, long baud, uint8_t channel, bool autoHop)</code>
                         <p class="text-sm mt-2 opacity-70">Initializes ESP-NOW and starts the Serial-to-Radio bridge.
-                            Usually attached to <code>Serial</code> at <code>1000000</code> baud.</p>
+                            Usually attached to <code>Serial</code> at <code>1000000</code> baud.
+                            When <code>autoHop</code> is <code>true</code>, the Leader will periodically scan for the quietest Wi-Fi channel
+                            and migrate the entire network automatically (every 30 seconds).</p>
                     </div>
                     <div class="border-sharp p-6">
                         <code class="block text-lg font-bold">bool update()</code>

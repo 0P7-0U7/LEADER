@@ -104,7 +104,8 @@ public:
    * throughput).
    * @param homeChannel Baseline Wi-Fi channel for initial sync (1-13).
    * @param autoHop Flag requesting dynamic channel scanning to prevent
-   * interference.
+   * interference. When enabled, the Leader will periodically scan for the
+   * quietest channel and migrate the network automatically.
    */
   void begin(Stream &serialPort, long baudRate = 1000000,
              uint8_t homeChannel = 1, bool autoHop = false);
@@ -139,6 +140,9 @@ public:
 private:
   Stream *_serial;
   uint8_t _homeChannel;
+  bool _autoHop = false;
+  unsigned long _lastAutoHopTime = 0;
+  static const unsigned long AUTO_HOP_INTERVAL = 30000; // 30 seconds
   uint8_t _broadcastAddress[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   esp_now_peer_info_t _peerInfo;
 
@@ -158,8 +162,8 @@ private:
   uint32_t _packetsSent = 0;
   uint32_t _packetsDropped = 0;
 
-// --- Node Registry ---
-#define MAX_NODES 32
+  // --- Node Registry ---
+  static constexpr uint8_t MAX_NODES = 32;
   struct NodeRecord {
     uint8_t mac[6];
     uint32_t nodeID;
@@ -169,6 +173,25 @@ private:
   NodeRecord _activeNodes[MAX_NODES];
   uint8_t _nodeCount = 0;
   void updateNodeRegistry(const uint8_t *mac, uint32_t nodeID);
+  void compactNodeRegistry();
+
+  // --- Thread-safe receive queue ---
+  static constexpr uint8_t RX_QUEUE_SIZE = 8;
+  struct RxPacket {
+    uint8_t data[250];
+    uint8_t mac[6];
+    int len;
+  };
+  volatile uint8_t _rxHead = 0;
+  volatile uint8_t _rxTail = 0;
+  RxPacket _rxQueue[RX_QUEUE_SIZE];
+
+  /**
+   * @brief Encodes and writes data over SLIP to the serial port.
+   * @param data Pointer to the raw payload.
+   * @param len Length of the payload.
+   */
+  void _sendSlipToSerial(const uint8_t *data, int len);
 
   /**
    * @brief Internal logic scanning existing Wi-Fi APs to evaluate congestion
@@ -280,9 +303,20 @@ private:
 
   // SLIP USB Variables for Tethered Mode
   bool _usbEnabled = false;
-  uint8_t _serialRxBuf[512];
+  uint8_t _serialRxBuf[250];
   int _serialRxLen = 0;
   bool _serialEscaping = false;
+
+  // --- Thread-safe receive queue ---
+  static constexpr uint8_t RX_QUEUE_SIZE = 8;
+  struct RxPacket {
+    uint8_t data[250];
+    uint8_t mac[6];
+    int len;
+  };
+  volatile uint8_t _rxHead = 0;
+  volatile uint8_t _rxTail = 0;
+  RxPacket _rxQueue[RX_QUEUE_SIZE];
 
   void _handleSerial();
   void _sendSlipToUSB(const uint8_t *data, int len);
